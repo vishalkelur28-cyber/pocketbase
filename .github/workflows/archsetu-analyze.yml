@@ -1,0 +1,29 @@
+name: ArchSetu Analysis
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # every Monday at 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 300
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ArchSetu CLI
+        run: npm install -g @archsetuweb/cli
+
+      - name: Analyze and submit
+        env:
+          ARCHSETU_API_KEY: ${{ secrets.ARCHSETU_API_KEY }}
+          NODE_OPTIONS: --max-old-space-size=6144
+        run: archsetu submit ${{ github.repository }} .
